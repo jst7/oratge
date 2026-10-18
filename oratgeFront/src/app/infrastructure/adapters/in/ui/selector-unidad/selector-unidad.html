@@ -1,0 +1,19 @@
+<div class="selector-unidad">
+  <span
+    class="selector-unidad__etiqueta selector-unidad__etiqueta--celsius"
+    [class.selector-unidad__etiqueta--activa]="!esFahrenheit"
+  >
+    °C
+  </span>
+  <mat-slide-toggle
+    [checked]="esFahrenheit"
+    (change)="alCambiar($event)"
+    aria-label="Alternar entre Celsius y Fahrenheit"
+  />
+  <span
+    class="selector-unidad__etiqueta selector-unidad__etiqueta--fahrenheit"
+    [class.selector-unidad__etiqueta--activa]="esFahrenheit"
+  >
+    °F
+  </span>
+</div>

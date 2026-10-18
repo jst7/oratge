@@ -1,0 +1,7 @@
+# Perfil de desarrollo. No contiene secretos: las claves viven siempre en el
+# .env, que no se versiona. Aquí solo van ajustes cómodos para desarrollar.
+oratge:
+  cache:
+    # Una hora es mucho mientras se trabaja: con 10 minutos se ven antes los
+    # cambios de AEMET sin dejar de ahorrar peticiones.
+    ttl: 10m

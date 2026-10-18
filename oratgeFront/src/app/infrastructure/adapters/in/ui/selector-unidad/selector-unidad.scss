@@ -1,0 +1,58 @@
+@use 'sass:color';
+
+// Las dos unidades son equivalentes, no una correcta y otra incorrecta: por eso
+// el toggle se colorea en ambos estados (verde en °C, azul en °F) en vez de usar
+// el gris "apagado" / color "encendido" por defecto de Material, que sugiere que
+// una posición es la buena.
+$color-celsius: #2e9e5b;
+$color-fahrenheit: #1976d2;
+
+.selector-unidad {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  &__etiqueta {
+    font-size: 0.85rem;
+    font-weight: 400;
+    opacity: 0.55;
+    transition: opacity 0.15s ease, color 0.15s ease;
+
+    &--activa {
+      font-weight: 700;
+      opacity: 1;
+    }
+
+    &--celsius.selector-unidad__etiqueta--activa {
+      color: $color-celsius;
+    }
+
+    &--fahrenheit.selector-unidad__etiqueta--activa {
+      color: $color-fahrenheit;
+    }
+  }
+
+  // Estado "off" (Celsius): Material lo pinta gris; lo teñimos de verde.
+  .mat-mdc-slide-toggle {
+    --mdc-switch-unselected-track-color: #{color.change($color-celsius, $alpha: 0.45)};
+    --mdc-switch-unselected-hover-track-color: #{color.change($color-celsius, $alpha: 0.6)};
+    --mdc-switch-unselected-focus-track-color: #{color.change($color-celsius, $alpha: 0.6)};
+    --mdc-switch-unselected-pressed-track-color: #{color.change($color-celsius, $alpha: 0.6)};
+    --mdc-switch-unselected-handle-color: #{$color-celsius};
+    --mdc-switch-unselected-hover-handle-color: #{color.adjust($color-celsius, $lightness: -8%)};
+    --mdc-switch-unselected-focus-handle-color: #{color.adjust($color-celsius, $lightness: -8%)};
+    --mdc-switch-unselected-pressed-handle-color: #{color.adjust($color-celsius, $lightness: -8%)};
+    --mdc-switch-unselected-icon-color: #fff;
+
+    // Estado "on" (Fahrenheit): azul.
+    --mdc-switch-selected-track-color: #{color.change($color-fahrenheit, $alpha: 0.45)};
+    --mdc-switch-selected-hover-track-color: #{color.change($color-fahrenheit, $alpha: 0.6)};
+    --mdc-switch-selected-focus-track-color: #{color.change($color-fahrenheit, $alpha: 0.6)};
+    --mdc-switch-selected-pressed-track-color: #{color.change($color-fahrenheit, $alpha: 0.6)};
+    --mdc-switch-selected-handle-color: #{$color-fahrenheit};
+    --mdc-switch-selected-hover-handle-color: #{color.adjust($color-fahrenheit, $lightness: -8%)};
+    --mdc-switch-selected-focus-handle-color: #{color.adjust($color-fahrenheit, $lightness: -8%)};
+    --mdc-switch-selected-pressed-handle-color: #{color.adjust($color-fahrenheit, $lightness: -8%)};
+    --mdc-switch-selected-icon-color: #fff;
+  }
+}

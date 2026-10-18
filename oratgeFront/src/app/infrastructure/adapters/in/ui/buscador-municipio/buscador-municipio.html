@@ -1,0 +1,28 @@
+<mat-form-field class="buscador-municipio__campo" appearance="outline" subscriptSizing="dynamic">
+  <mat-label>Municipio</mat-label>
+  <input
+    matInput
+    type="text"
+    placeholder="Escribe un municipio, p.ej. Málaga"
+    [formControl]="control"
+    [matAutocomplete]="listaMunicipios"
+  />
+  @if (buscando()) {
+    <mat-spinner matSuffix diameter="20" />
+  } @else {
+    <mat-icon matSuffix class="buscador-municipio__lupa">search</mat-icon>
+  }
+</mat-form-field>
+
+<mat-autocomplete
+  #listaMunicipios="matAutocomplete"
+  [displayWith]="mostrarEtiqueta"
+  (optionSelected)="alSeleccionar($event)"
+>
+  @for (opcion of opciones(); track opcion.codigo) {
+    <mat-option [value]="opcion">{{ opcion.etiqueta }}</mat-option>
+  }
+  @if (opciones().length === 0 && control.value.length > 0 && !buscando()) {
+    <mat-option disabled>Sin resultados</mat-option>
+  }
+</mat-autocomplete>

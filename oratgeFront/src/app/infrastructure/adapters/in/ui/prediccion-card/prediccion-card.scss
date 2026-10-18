@@ -1,0 +1,375 @@
+// El ancho se fija en el host y no en la mat-card: el host es `display: inline`
+// por defecto, así que sin esto se ajustaría al contenido y la card cambiaría
+// de ancho según lo largo que fuese el texto ("Hoy" frente a "Miércoles").
+:host {
+  display: block;
+  width: min(100%, 420px);
+}
+
+.prediccion-card {
+  position: relative; // ancla para las acciones de la esquina
+  width: 100%;
+  padding: 1.25rem 1.5rem 2rem;
+
+  // Fila de controles proyectados (buscador + selector de unidad).
+  // El ancho flexible del buscador lo define la página, que es quien
+  // sabe qué componentes está proyectando.
+  &__controles {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 56px; // alto de la caja del campo de texto, para centrar el selector
+
+    // En las tarjetas fijadas no hay buscador: la fila solo lleva el selector
+    // de unidad, alineado a la derecha y sin reservar el alto del campo.
+    &--compacta {
+      justify-content: flex-end;
+      min-height: 0;
+    }
+  }
+
+  // Variante reducida para la fila de tarjetas fijadas.
+  &--compacta {
+    padding: 1rem 1.25rem 2.25rem;
+
+    .prediccion-card__cuerpo {
+      min-height: 230px;
+    }
+
+    .prediccion-card__municipio {
+      margin-top: 0.5rem;
+      font-size: 1.3rem;
+    }
+
+    .prediccion-card__fecha {
+      font-size: 0.8rem;
+    }
+
+    .prediccion-card__temperatura {
+      font-size: 2.75rem;
+    }
+
+    .prediccion-card__icono {
+      font-size: 3rem;
+      width: 3rem;
+      height: 3rem;
+    }
+
+    .prediccion-card__cabecera {
+      margin: 1rem 0 0.5rem;
+    }
+
+    .prediccion-card__precipitacion {
+      margin-top: 1.5rem;
+    }
+
+    .prediccion-card__porcentaje {
+      font-size: 0.9rem;
+    }
+
+    .prediccion-card__periodo {
+      font-size: 0.6rem;
+    }
+  }
+
+  // Altura reservada para que la card mida siempre lo mismo pase lo que pase:
+  // vacía, cargando, con datos o con error.
+  &__cuerpo {
+    position: relative;
+    min-height: 290px;
+    // El contenido de error no debe hacer crecer la card: si lo hiciera, en la
+    // fila de guardadas unas quedarían más altas que otras.
+    overflow: hidden;
+  }
+
+  // Ocupa exactamente el alto reservado del cuerpo, de modo que una card en
+  // error, otra cargando y otra con datos midan lo mismo.
+  &__estado {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0 0.5rem;
+    text-align: center;
+    color: var(--mat-sys-on-surface-variant);
+
+    p {
+      margin: 0;
+      // Un mensaje largo se recorta en lugar de desbordar la card.
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 4;
+      line-clamp: 4;
+      overflow: hidden;
+    }
+
+    &--error {
+      color: var(--mat-sys-error);
+    }
+  }
+
+  &__municipio {
+    margin: 1rem 0 0.25rem;
+    font-size: 1.75rem;
+    font-weight: 400;
+    line-height: 1.2;
+    // Los nombres largos ("Villanueva de la Concepción") se recortan en vez de
+    // deformar la card; el nombre completo queda en el title para consultarlo.
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &__fecha {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--mat-sys-on-surface-variant);
+    // El ancho es fijo: si la etiqueta del día y la fecha no caben, se recortan.
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  // Destaca a qué jornada corresponde lo que se está viendo.
+  &__dia {
+    font-weight: 600;
+    color: var(--mat-sys-primary);
+  }
+
+  &__separador {
+    margin: 0 0.35rem;
+    opacity: 0.5;
+  }
+
+  &__cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 1.5rem 0 0.5rem;
+  }
+
+  &__temperatura {
+    margin: 0;
+    font-size: 4rem;
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__unidad {
+    font-size: 0.6em; // relativo a la temperatura, para que escale con ella
+    font-weight: 300;
+  }
+
+  &__icono {
+    flex: none;
+    font-size: 4.5rem;
+    width: 4.5rem;
+    height: 4.5rem;
+    font-variation-settings: 'FILL' 1; // iconos rellenos, como en el diseño
+
+    &--sunny {
+      color: #f5c518;
+    }
+
+    &--partly_cloudy_day {
+      color: #f0b429;
+    }
+
+    &--rainy {
+      color: #5a9ced;
+    }
+  }
+
+  &__precipitacion {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    margin-top: 2.5rem;
+  }
+
+  &__precipitacion-icono {
+    flex: none;
+    margin-bottom: 1.75rem; // alineado con la fila de porcentajes
+    color: var(--mat-sys-on-surface-variant);
+    opacity: 0.6;
+  }
+
+  // Rejilla de dos filas: porcentajes arriba, tramos horarios abajo,
+  // separados por la línea. `--numero-bloques` lo fija la plantilla
+  // para no asumir que siempre llegan cuatro tramos.
+  &__linea-temporal {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: repeat(var(--numero-bloques, 4), 1fr);
+    row-gap: 0.4rem;
+  }
+
+  &__porcentaje {
+    text-align: center;
+    font-size: 1.15rem;
+    color: var(--mat-sys-on-surface-variant);
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  &__periodo {
+    position: relative;
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--mat-sys-on-surface-variant);
+
+    // Marcas verticales que separan los tramos, como en un eje temporal.
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      top: -0.35rem;
+      height: 0.4rem;
+      border-left: 1px solid var(--mat-sys-outline-variant);
+    }
+
+    &::before {
+      left: 0;
+    }
+
+    // Solo el último tramo cierra el eje por la derecha.
+    &::after {
+      right: 0;
+      display: none;
+    }
+
+    &:last-child::after {
+      display: block;
+    }
+  }
+
+  // ---- Esqueleto -----------------------------------------------------------
+
+  &__esqueleto {
+    // En el estado inicial el esqueleto es solo un fondo para el mensaje.
+    opacity: 0.55;
+
+    &--animado {
+      opacity: 1;
+    }
+  }
+
+  &__hueso {
+    display: block;
+    border-radius: 4px;
+    background: var(--mat-sys-surface-variant, rgb(0 0 0 / 8%));
+
+    &--municipio {
+      margin: 1rem 0 0.5rem;
+      width: 55%;
+      height: 1.9rem;
+    }
+
+    &--fecha {
+      width: 72%;
+      height: 0.95rem;
+    }
+
+    &--temperatura {
+      width: 45%;
+      height: 4rem;
+    }
+
+    &--icono {
+      flex: none;
+      width: 4.5rem;
+      height: 4.5rem;
+      border-radius: 50%;
+    }
+
+    &--precipitacion-icono {
+      flex: none;
+      width: 1.5rem;
+      height: 1.5rem;
+      margin-bottom: 1.75rem;
+      border-radius: 50%;
+    }
+
+    &--porcentaje {
+      width: 60%;
+      height: 1rem;
+      margin: 0 auto;
+    }
+
+    &--periodo {
+      width: 80%;
+      height: 0.6rem;
+      margin: 0 auto;
+    }
+  }
+
+  // Barrido de brillo solo mientras se está cargando.
+  &__esqueleto--animado &__hueso {
+    background-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgb(255 255 255 / 55%) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    background-repeat: no-repeat;
+    animation: prediccion-card-brillo 1.3s ease-in-out infinite;
+  }
+
+  &__mensaje {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__mensaje-icono {
+    font-size: 3.5rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    font-variation-settings: 'FILL' 1;
+    color: #f5c518;
+  }
+
+  &__mensaje-texto {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 500;
+  }
+}
+
+@keyframes prediccion-card-brillo {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+
+// Respeta a quien prefiere no ver animaciones.
+@media (prefers-reduced-motion: reduce) {
+  .prediccion-card__esqueleto--animado .prediccion-card__hueso {
+    animation: none;
+  }
+}
+
+// Acciones ancladas a la esquina inferior derecha de la card.
+.prediccion-card__acciones {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}

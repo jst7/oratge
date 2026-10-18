@@ -1,0 +1,124 @@
+<mat-card
+  class="prediccion-card"
+  [class.prediccion-card--compacta]="compacta()"
+  appearance="outlined"
+>
+  <!-- Los controles (buscador y selector de unidad) se reciben por proyección de
+       contenido: la card decide dónde y cómo se colocan, pero no conoce qué
+       componentes son ni cómo obtienen los datos. -->
+  <div class="prediccion-card__controles" [class.prediccion-card__controles--compacta]="compacta()">
+    <ng-content select="[cardControles]"></ng-content>
+  </div>
+
+  <!-- El cuerpo tiene altura reservada y el esqueleto replica la maqueta real,
+       así la card no cambia de tamaño al pasar de vacío a cargando a cargado. -->
+  <div class="prediccion-card__cuerpo">
+    @if (error()) {
+      <div class="prediccion-card__estado prediccion-card__estado--error">
+        <mat-icon>error</mat-icon>
+        <p>{{ error() }}</p>
+      </div>
+    } @else if (prediccion()) {
+      @let datos = prediccion()!;
+
+      <h2 class="prediccion-card__municipio" [title]="datos.nombreMunicipio">
+        {{ datos.nombreMunicipio }}
+      </h2>
+      <p class="prediccion-card__fecha">
+        <span class="prediccion-card__dia">{{ datos.etiquetaDia }}</span>
+        <span class="prediccion-card__separador" aria-hidden="true">·</span>
+        {{ datos.fechaTexto }}
+      </p>
+
+      <div class="prediccion-card__cabecera">
+        <p class="prediccion-card__temperatura">
+          {{ datos.temperaturaValor }}<span class="prediccion-card__unidad">{{ datos.unidadTexto }}</span>
+        </p>
+        <mat-icon
+          class="prediccion-card__icono"
+          [class]="'prediccion-card__icono--' + datos.icono"
+          [attr.aria-label]="etiquetaIcono(datos.icono)"
+        >
+          {{ datos.icono }}
+        </mat-icon>
+      </div>
+
+      @if (datos.bloques.length > 0) {
+        <section class="prediccion-card__precipitacion">
+          <mat-icon class="prediccion-card__precipitacion-icono" aria-hidden="true">rainy</mat-icon>
+
+          <!-- Línea temporal: los porcentajes van sobre la línea y los tramos
+               horarios debajo, repartidos en columnas de igual ancho. -->
+          <div
+            class="prediccion-card__linea-temporal"
+            [style.--numero-bloques]="datos.bloques.length"
+            role="list"
+            aria-label="Probabilidad de precipitación por tramo horario"
+          >
+            @for (bloque of datos.bloques; track bloque.periodo) {
+              <span
+                class="prediccion-card__porcentaje"
+                role="listitem"
+                [attr.aria-label]="bloque.periodo + ': ' + bloque.porcentajeTexto"
+              >
+                {{ bloque.porcentajeTexto }}
+              </span>
+            }
+
+            @for (bloque of datos.bloques; track bloque.periodo) {
+              <span class="prediccion-card__periodo">{{ bloque.periodo }}</span>
+            }
+          </div>
+        </section>
+      }
+    } @else {
+      <!-- Esqueleto: mismas piezas y medidas que el contenido real. Se anima solo
+           mientras se carga; en el estado inicial queda estático bajo el mensaje. -->
+      <div
+        class="prediccion-card__esqueleto"
+        [class.prediccion-card__esqueleto--animado]="cargando()"
+        [attr.aria-busy]="cargando()"
+        aria-hidden="true"
+      >
+        <div class="prediccion-card__hueso prediccion-card__hueso--municipio"></div>
+        <div class="prediccion-card__hueso prediccion-card__hueso--fecha"></div>
+
+        <div class="prediccion-card__cabecera">
+          <div class="prediccion-card__hueso prediccion-card__hueso--temperatura"></div>
+          <div class="prediccion-card__hueso prediccion-card__hueso--icono"></div>
+        </div>
+
+        <div class="prediccion-card__precipitacion">
+          <div class="prediccion-card__hueso prediccion-card__hueso--precipitacion-icono"></div>
+          <div class="prediccion-card__linea-temporal" [style.--numero-bloques]="4">
+            @for (columna of COLUMNAS_ESQUELETO; track columna) {
+              <span class="prediccion-card__porcentaje">
+                <span class="prediccion-card__hueso prediccion-card__hueso--porcentaje"></span>
+              </span>
+            }
+            @for (columna of COLUMNAS_ESQUELETO; track columna) {
+              <span class="prediccion-card__periodo">
+                <span class="prediccion-card__hueso prediccion-card__hueso--periodo"></span>
+              </span>
+            }
+          </div>
+        </div>
+      </div>
+
+      @if (!cargando()) {
+        <div class="prediccion-card__mensaje">
+          <mat-icon class="prediccion-card__mensaje-icono" aria-hidden="true">
+            sentiment_very_satisfied
+          </mat-icon>
+          <p class="prediccion-card__mensaje-texto">Busca tu municipio</p>
+        </div>
+      }
+    }
+  </div>
+
+  <!-- Acciones de la card (guardar, eliminar…): otra ranura de proyección, para
+       que la card no sepa qué se puede hacer con ella; eso lo decide quien la usa. -->
+  <div class="prediccion-card__acciones">
+    <ng-content select="[cardAcciones]"></ng-content>
+  </div>
+</mat-card>

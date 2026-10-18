@@ -1,0 +1,10 @@
+.dialogo-confirmacion__titulo {
+  font-size: 1.15rem;
+  line-height: 1.4;
+}
+
+// Es una acción destructiva: se tiñe con el color de error del tema.
+.dialogo-confirmacion__confirmar {
+  --mdc-filled-button-container-color: var(--mat-sys-error);
+  --mdc-filled-button-label-text-color: var(--mat-sys-on-error);
+}

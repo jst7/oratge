@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: oratgeBack
+  # Importa el .env (formato clave=valor) como fuente de propiedades, de modo
+  # que no hace falta exportar nada a mano ni usar un perfil aparte.
+  # Se prueban la raíz del repo y el directorio del módulo para que funcione
+  # tanto con `mvn spring-boot:run` como con `java -jar`.
+  config:
+    import:
+      - optional:file:./.env[.properties]
+      - optional:file:../.env[.properties]
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: false
+  cache:
+    type: caffeine
+    cache-names:
+      - municipios
+      - predicciones
+    caffeine:
+      spec: expireAfterWrite=${oratge.cache.ttl},maximumSize=${oratge.cache.max-size}
+
+
+server:
+  port: 8080
+
+oratge:
+  cache:
+    # AEMET limita las peticiones por endpoint y sus datos no cambian minuto a
+    # minuto, así que se reutiliza la respuesta de una consulta idéntica.
+    ttl: 1h
+    # Acota la memoria: hay 8122 municipios posibles.
+    max-size: 2000
+
+  api-key:
+    # Clave que deben enviar los clientes en la cabecera X-Api-Key.
+    # Sin valor por defecto a propósito: si falta, la aplicación no arranca y
+    # lo dice. Un default vacío la dejaría arrancar "funcionando" pero
+    # rechazando a todo el mundo.
+    valor: ${ORATGE_API_KEY}
+    habilitada: true
+
+aemet:
+  api:
+    base-url: https://opendata.aemet.es/opendata
+    # Tampoco tiene valor por defecto: con la clave vacía AEMET no devuelve un
+    # 401 sino una página HTML, y el fallo aparece mucho más tarde y peor.
+    api-key: ${AEMET_API_KEY}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs

@@ -1,0 +1,49 @@
+name: Frontend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'oratgeFront/**'
+      - '.github/workflows/frontend.yml'
+  pull_request:
+    paths:
+      - 'oratgeFront/**'
+      - '.github/workflows/frontend.yml'
+
+concurrency:
+  group: frontend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Compilar y pasar los tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: oratgeFront
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Preparar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: oratgeFront/package-lock.json
+
+      # `ci` y no `install`: instala exactamente lo del package-lock.json.
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Comprobar los tipos
+        run: npx tsc --noEmit
+
+      # `--watch=false` es el valor por defecto fuera de una terminal
+      # interactiva, pero se deja explícito para que no dependa del entorno.
+      - name: Pasar los tests
+        run: npm test -- --watch=false
+
+      - name: Compilar para producción
+        run: npm run build

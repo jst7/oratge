@@ -1,0 +1,52 @@
+<main class="pagina-prediccion">
+  <header class="pagina-prediccion__cabecera">
+    <h1 class="pagina-prediccion__titulo">Oratge — el tiempo de tu municipio</h1>
+    <app-selector-dia [diaVista]="diaVista()" (diaCambiado)="alCambiarDia($event)" />
+  </header>
+
+  <app-prediccion-card
+    [prediccion]="prediccion()"
+    [cargando]="cargandoPrediccion()"
+    [error]="errorPrediccion()"
+  >
+    <app-buscador-municipio
+      cardControles
+      class="pagina-prediccion__buscador"
+      [opciones]="opcionesMunicipio()"
+      [buscando]="buscandoMunicipios()"
+      (textoBuscado)="alBuscarTexto($event)"
+      (municipioSeleccionado)="alSeleccionarMunicipio($event)"
+    />
+
+    <app-selector-unidad
+      cardControles
+      [unidad]="unidad()"
+      (unidadCambiada)="alCambiarUnidad($event)"
+    />
+
+    <button
+      cardAcciones
+      matIconButton
+      type="button"
+      class="pagina-prediccion__guardar"
+      [disabled]="!puedeFijar()"
+      [matTooltip]="puedeFijar() ? 'Guardar este municipio' : 'Ya está guardado'"
+      aria-label="Guardar este municipio"
+      (click)="alFijarMunicipio()"
+    >
+      <mat-icon>bookmark_add</mat-icon>
+    </button>
+  </app-prediccion-card>
+
+  @if (municipiosFijados().length > 0) {
+    <section class="pagina-prediccion__fijados" aria-label="Municipios guardados">
+      @for (municipio of municipiosFijados(); track municipio.codigo) {
+        <app-tarjeta-fijada
+          [municipio]="municipio"
+          [diaVista]="diaVista()"
+          (eliminado)="alEliminarFijado($event)"
+        />
+      }
+    </section>
+  }
+</main>

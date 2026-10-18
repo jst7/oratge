@@ -1,0 +1,24 @@
+<app-prediccion-card
+  compacta
+  [prediccion]="prediccion()"
+  [cargando]="cargando()"
+  [error]="error()"
+>
+  <app-selector-unidad
+    cardControles
+    [unidad]="unidad()"
+    (unidadCambiada)="alCambiarUnidad($event)"
+  />
+
+  <button
+    cardAcciones
+    matIconButton
+    type="button"
+    class="tarjeta-fijada__eliminar"
+    [matTooltip]="'Dejar de seguir ' + municipio().nombre"
+    [attr.aria-label]="'Dejar de seguir ' + municipio().nombre"
+    (click)="pedirConfirmacion()"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+</app-prediccion-card>

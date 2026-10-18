@@ -1,0 +1,11 @@
+<mat-button-toggle-group
+  class="selector-dia"
+  hideSingleSelectionIndicator
+  [value]="diaVista()"
+  aria-label="Día de la predicción"
+  (change)="alCambiar($event.value)"
+>
+  @for (opcion of opciones(); track opcion.valor) {
+    <mat-button-toggle [value]="opcion.valor">{{ opcion.etiqueta }}</mat-button-toggle>
+  }
+</mat-button-toggle-group>

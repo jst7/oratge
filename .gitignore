@@ -1,0 +1,28 @@
+# ---- Secretos -------------------------------------------------------------
+# Nunca deben llegar al repositorio: contienen las claves de AEMET y la propia.
+.env
+.env.*
+!.env.example
+
+# ---- Documentación interna ------------------------------------------------
+documentacion.md
+
+# ---- Herramientas y entornos locales --------------------------------------
+.idea/
+.claude/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# ---- Sistema operativo ----------------------------------------------------
+.DS_Store
+Thumbs.db
+
+# ---- Artefactos de construcción -------------------------------------------
+# Cada proyecto tiene además su propio .gitignore; esto es una red de seguridad
+# por si se ejecuta un build desde la raíz.
+target/
+dist/
+node_modules/
+.angular/

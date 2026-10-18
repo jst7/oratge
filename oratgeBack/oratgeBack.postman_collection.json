@@ -1,0 +1,430 @@
+{
+  "info": {
+    "name": "oratgeBack - API del tiempo (AEMET)",
+    "description": "Colección para probar los endpoints de oratgeBack.\n\nArranca la app con el perfil `local`:\n\n    ./mvnw -pl oratge-bootstrap spring-boot:run -Dspring-boot.run.profiles=local\n\nTodas las rutas /municipio/** exigen la cabecera `X-Api-Key`. La clave está en la variable de colección `apiKey` y se envía automáticamente a nivel de colección, así que no hace falta repetirla en cada petición.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "X-Api-Key",
+        "type": "string"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}",
+        "type": "string"
+      },
+      {
+        "key": "in",
+        "value": "header",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "apiKey",
+      "value": "LjAuG0BA7d7YvQLNkp8mG4uTVmdvcfnvTxwEsToSRzw",
+      "type": "string",
+      "description": "Debe coincidir con ORATGE_API_KEY del .env del backend."
+    },
+    {
+      "key": "codigoMunicipio",
+      "value": "28079",
+      "type": "string",
+      "description": "Código INE. 28079 = Madrid. Se rellena al ejecutar la búsqueda."
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Buscar municipios por nombre",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/municipio/search?name=madrid",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "municipio",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "name",
+              "value": "madrid",
+              "description": "Nombre o parte. No distingue mayúsculas ni acentos ('malaga' encuentra 'Málaga')."
+            }
+          ]
+        },
+        "description": "Devuelve [{\"codigo\":\"28079\",\"nombre\":\"Madrid\"}, ...]. El código es el id de AEMET sin el prefijo 'id'."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('devuelve un array', () => pm.expect(body).to.be.an('array'));",
+              "if (body.length > 0) {",
+              "    pm.test('cada elemento tiene codigo y nombre', () => {",
+              "        pm.expect(body[0]).to.have.property('codigo');",
+              "        pm.expect(body[0]).to.have.property('nombre');",
+              "    });",
+              "    pm.test(\"codigo sin prefijo 'id'\", () => pm.expect(body[0].codigo).to.match(/^\\d+$/));",
+              "    pm.collectionVariables.set('codigoMunicipio', body[0].codigo);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2a. Predicción - hoy, Celsius (valores por defecto)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/municipio/{{codigoMunicipio}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "municipio",
+            "{{codigoMunicipio}}"
+          ],
+          "query": []
+        },
+        "description": "Sin parámetros: día 0 (hoy) y grados Celsius."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('unidad por defecto es G_CEL', () => pm.expect(body.unidadTemperatura).to.eql('G_CEL'));",
+              "pm.test('incluye la fecha del día devuelto', () => pm.expect(body.fecha).to.match(/^\\d{4}-\\d{2}-\\d{2}$/));",
+              "pm.test('por defecto es hoy', () => {",
+              "    const hoy = new Date().toISOString().slice(0, 10);",
+              "    pm.expect(body.fecha).to.eql(hoy);",
+              "});",
+              "pm.test('mediaTemperatura es numérica', () => pm.expect(body.mediaTemperatura).to.be.a('number'));",
+              "pm.test('probPrecipitacion es un array', () => pm.expect(body.probPrecipitacion).to.be.an('array'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2b. Predicción - mañana (dia=1)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/municipio/{{codigoMunicipio}}?dia=1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "municipio",
+            "{{codigoMunicipio}}"
+          ],
+          "query": [
+            {
+              "key": "dia",
+              "value": "1",
+              "description": "0 = hoy, 1 = mañana… hasta 3."
+            }
+          ]
+        },
+        "description": "Los días 0 y 1 traen bloques de 6 horas."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('la fecha es la de mañana', () => {",
+              "    const manana = new Date(Date.now() + 86400000).toISOString().slice(0, 10);",
+              "    pm.expect(body.fecha).to.eql(manana);",
+              "});",
+              "pm.test('tramos de 6 horas', () => {",
+              "    const periodos = body.probPrecipitacion.map((p) => p.periodo);",
+              "    pm.expect(periodos).to.include('00-06');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2c. Predicción - dia=3 (granularidad de medio día)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/municipio/{{codigoMunicipio}}?dia=3",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "municipio",
+            "{{codigoMunicipio}}"
+          ],
+          "query": [
+            {
+              "key": "dia",
+              "value": "3"
+            }
+          ]
+        },
+        "description": "A partir del día 2 AEMET solo publica medios días (00-12 / 12-24), no bloques de 6 horas."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('devuelve algún tramo', () => pm.expect(body.probPrecipitacion.length).to.be.above(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2d. Predicción - Fahrenheit",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/municipio/{{codigoMunicipio}}?unidad=G_FAH",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "municipio",
+            "{{codigoMunicipio}}"
+          ],
+          "query": [
+            {
+              "key": "unidad",
+              "value": "G_FAH"
+            }
+          ]
+        },
+        "description": "Misma predicción con la temperatura convertida a grados Fahrenheit."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', () => pm.response.to.have.status(200));",
+              "pm.test('unidad G_FAH', () => pm.expect(pm.response.json().unidadTemperatura).to.eql('G_FAH'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Error - municipio inexistente (404)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/municipio/99999",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "municipio",
+            "99999"
+          ],
+          "query": []
+        },
+        "description": "AEMET responde HTTP 200 con estado 404 en el cuerpo; la API lo traduce a un 404 propio."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 404', () => pm.response.to.have.status(404));",
+              "pm.test('incluye mensaje de error', () => pm.expect(pm.response.json()).to.have.property('message'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Error - unidad inválida (400)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/municipio/{{codigoMunicipio}}?unidad=KELVIN",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "municipio",
+            "{{codigoMunicipio}}"
+          ],
+          "query": [
+            {
+              "key": "unidad",
+              "value": "KELVIN"
+            }
+          ]
+        },
+        "description": "Solo se admiten G_CEL y G_FAH."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Error - dia fuera de rango (400)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/municipio/{{codigoMunicipio}}?dia=4",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "municipio",
+            "{{codigoMunicipio}}"
+          ],
+          "query": [
+            {
+              "key": "dia",
+              "value": "4"
+            }
+          ]
+        },
+        "description": "El horizonte máximo es 3; más allá AEMET no publica probabilidad de precipitación."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 400', () => pm.response.to.have.status(400));",
+              "pm.test('explica el parámetro', () => pm.expect(pm.response.json().message).to.include('dia'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Error - sin API key (401)",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/municipio/{{codigoMunicipio}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "municipio",
+            "{{codigoMunicipio}}"
+          ]
+        },
+        "description": "Desactiva la autenticación de la colección para comprobar que la API queda protegida."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 401', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

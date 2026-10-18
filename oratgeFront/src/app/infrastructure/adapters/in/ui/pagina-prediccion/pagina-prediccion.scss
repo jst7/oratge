@@ -1,0 +1,46 @@
+.pagina-prediccion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+
+  // Título arriba y, debajo, el selector de día.
+  &__cabecera {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  &__titulo {
+    margin: 0;
+    font-size: 2.4rem;
+    font-weight: 200;
+    letter-spacing: -0.015em;
+    text-align: center;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  // El buscador ocupa el espacio sobrante de la fila de controles de la card;
+  // la card define la fila (flex) y la página, qué crece dentro de ella.
+  &__buscador {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  // Fila inferior: las tarjetas guardadas se colocan una al lado de otra y
+  // saltan de línea cuando no caben.
+  &__fijados {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    // `stretch` iguala el alto de las tarjetas de cada fila, así una tarjeta
+    // en error o cargando no rompe la alineación de las demás.
+    align-items: stretch;
+    gap: 1rem;
+    width: 100%;
+  }
+}
