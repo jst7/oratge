@@ -24,8 +24,12 @@ public class MunicipioAemetAdapter implements MunicipioRepositoryPort {
     private final AemetApiClient aemetApiClient;
     private final AemetMunicipioMapper municipioMapper;
 
+    /**
+     * {@code sync = true} hace que, con la caché fría, solo una petición descargue
+     * los 3 MB del maestro y las demás esperen a ese mismo resultado.
+     */
     @Override
-    @Cacheable("municipios")
+    @Cacheable(cacheNames = "municipios", sync = true)
     public List<Municipio> obtenerTodos() {
         try {
             List<AemetMunicipioDto> municipios = aemetApiClient.obtener(

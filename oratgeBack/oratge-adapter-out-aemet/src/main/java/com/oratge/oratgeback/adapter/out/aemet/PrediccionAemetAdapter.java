@@ -31,9 +31,14 @@ public class PrediccionAemetAdapter implements PrediccionRepositoryPort {
      * Se cachea aquí, antes de convertir la unidad, para que las consultas en
      * Celsius y en Fahrenheit del mismo municipio y día compartan una única
      * llamada a AEMET. La clave la componen los dos parámetros del método.
+     *
+     * {@code sync = true} evita el "cache stampede": si llegan varias peticiones
+     * del mismo municipio con la caché fría, solo una consulta a AEMET y el resto
+     * espera a su resultado. Sin esto saldrían todas a la vez, que es justo lo que
+     * provoca que AEMET responda 429.
      */
     @Override
-    @Cacheable("predicciones")
+    @Cacheable(cacheNames = "predicciones", sync = true)
     public PrediccionMunicipio obtenerPrediccionDiaria(String codigoMunicipio, LocalDate fecha) {
         List<AemetPrediccionDiariaDto> prediccion = pedirAAemet(codigoMunicipio);
 
