@@ -2,11 +2,11 @@
  * Entorno de producción.
  *
  * Aquí no hay proxy de desarrollo, así que la URL del backend debe ser
- * absoluta. Ajustar según dónde se despliegue la API real.
+ * absoluta: es la API desplegada en Coolify.
  */
 export const environment = {
   production: true,
-  apiBaseUrl: 'http://localhost:8080',
+  apiBaseUrl: 'https://api-oratge.jstormo.com',
 
   /**
    * Clave de acceso al backend (cabecera X-Api-Key).

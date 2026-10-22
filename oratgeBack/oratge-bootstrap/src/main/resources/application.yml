@@ -32,6 +32,11 @@ oratge:
     # Acota la memoria: hay 8122 municipios posibles.
     max-size: 2000
 
+  cors:
+    # Orígenes del frontend, separados por comas. En producción se sobrescribe
+    # con la variable ORATGE_CORS_ORIGINS (p. ej. https://oratge.jstormo.com).
+    allowed-origins: ${ORATGE_CORS_ORIGINS:http://localhost:4200}
+
   api-key:
     # Clave que deben enviar los clientes en la cabecera X-Api-Key.
     # Sin valor por defecto a propósito: si falta, la aplicación no arranca y
